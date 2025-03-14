@@ -14,7 +14,7 @@ def test_empty_db():
 
 @pytest.mark.django_db
 @pytest.mark.parametrize(
-    "name", ("news:home", "users:login", "users:logout", "users:signup")
+    'name', ('news:home', 'users:login', 'users:logout', 'users:signup')
 )
 def test_pages_availability_for_anonymous_user(client, name, news):
     """
@@ -22,7 +22,7 @@ def test_pages_availability_for_anonymous_user(client, name, news):
     регистрации, отдельной новости анонимному пользователю(всем).
     """
     url = reverse(name)
-    url1 = reverse("news:detail", args=(news.pk,))
+    url1 = reverse('news:detail', args=(news.pk,))
     response = client.get(url)
     response1 = client.get(url1)
     assert response.status_code == HTTPStatus.OK
@@ -30,7 +30,7 @@ def test_pages_availability_for_anonymous_user(client, name, news):
 
 
 @pytest.mark.django_db
-@pytest.mark.parametrize("name", ("news:delete", "news:edit"))
+@pytest.mark.parametrize('name', ('news:delete', 'news:edit'))
 def test_pages_availability_for_author(author_client, name, comment):
     """
     Проверка доcтупа к редактированию
@@ -42,12 +42,10 @@ def test_pages_availability_for_author(author_client, name, comment):
 
 
 @pytest.mark.django_db
-@pytest.mark.parametrize("name", ("news:edit", "news:delete"))
+@pytest.mark.parametrize('name', ('news:edit', 'news:delete'))
 def test_redirects(client, name, comment):
-    """
-    Проверка редиректа на страницу логина.
-    """
-    login_url = reverse("users:login")
+    """Проверка редиректа на страницу логина."""
+    login_url = reverse('users:login')
     url = reverse(name, args=(comment.pk,))
     expected_url = f"{login_url}?next={url}"
     response = client.get(url)
@@ -55,7 +53,7 @@ def test_redirects(client, name, comment):
 
 
 @pytest.mark.django_db
-@pytest.mark.parametrize("name", ("news:delete", "news:edit"))
+@pytest.mark.parametrize('name', ('news:delete', 'news:edit'))
 def test_pages_availability_for_author(not_author_client, name, comment):
     """
     Проверка доcтупа к редактированию

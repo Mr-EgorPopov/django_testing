@@ -15,22 +15,22 @@ class TestPage(TestCase):
     @classmethod
     def setUpTestData(cls):
         """Создание новостей."""
-        cls.author = User.objects.create(username="author")
-        cls.user = User.objects.create(username="user")
+        cls.author = User.objects.create(username='author')
+        cls.user = User.objects.create(username='user')
         cls.note_author = Note.objects.create(
-            title="Заголовок", text="Текст", author=cls.author
+            title='Заголовок', text='Текст', author=cls.author
         )
         cls.note_user = Note.objects.create(
-            title="Заголовок_детект", text="Текст", author=cls.user
+            title='Заголовок_детект', text='Текст', author=cls.user
         )
-        cls.add_url = reverse("notes:add")
-        cls.edit_url = reverse("notes:edit", args=(cls.note_author.slug,))
+        cls.add_url = reverse('notes:add')
+        cls.edit_url = reverse('notes:edit', args=(cls.note_author.slug,))
 
     def test_has_form(self):
         self.client.force_login(self.author)
         response = self.client.get(self.add_url)
-        self.assertIn("form", response.context)
-        self.assertIsInstance(response.context["form"], NoteForm)
+        self.assertIn('form', response.context)
+        self.assertIsInstance(response.context['form'], NoteForm)
 
     def test_notes_list_include(self):
         """
@@ -39,7 +39,7 @@ class TestPage(TestCase):
         """
         self.client.force_login(self.author)
         response = self.client.get(self.LIST_URL)
-        object_list = response.context["object_list"]
+        object_list = response.context['object_list']
         self.assertIn(self.note_author, object_list)
         self.assertNotIn(self.note_user, object_list)
 
@@ -50,5 +50,5 @@ class TestPage(TestCase):
         """
         self.client.force_login(self.author)
         response = self.client.get(self.LIST_URL)
-        object_list = response.context["object_list"]
+        object_list = response.context['object_list']
         self.assertIn(self.note_author, object_list)

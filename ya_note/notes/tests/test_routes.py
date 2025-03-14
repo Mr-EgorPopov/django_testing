@@ -14,10 +14,10 @@ class TestRoutes(TestCase):
     @classmethod
     def setUpTestData(cls):
         """Создание заметки."""
-        cls.author = User.objects.create(username="testuser")
-        cls.anon = User.objects.create(username="anonuser")
+        cls.author = User.objects.create(username='testuser')
+        cls.anon = User.objects.create(username='anonuser')
         cls.note = Note.objects.create(
-            title="Заголовок", text="Текст", author=cls.author
+            title='Заголовок', text='Текст', author=cls.author
         )
 
     def test_pages_availability(self):
@@ -27,10 +27,10 @@ class TestRoutes(TestCase):
             (self.anon, HTTPStatus.OK),
         )
         urls = (
-            ("notes:home", None),
-            ("users:login", None),
-            ("users:logout", None),
-            ("users:signup", None),
+            ('notes:home', None),
+            ('users:login', None),
+            ('users:logout', None),
+            ('users:signup', None),
         )
         for user, status in users_statuses:
             self.client.force_login(user)
@@ -49,9 +49,9 @@ class TestRoutes(TestCase):
         for user, status in users_statuses:
             self.client.force_login(user)
             for name in (
-                "notes:edit",
-                "notes:delete",
-                "notes:detail",
+                'notes:edit',
+                'notes:delete',
+                'notes:detail',
             ):
                 with self.subTest(user=user, name=name):
                     url = reverse(name, args=(self.note.slug,))
@@ -60,20 +60,20 @@ class TestRoutes(TestCase):
 
     def test_redirect_for_anonymous_client(self):
         """Проверка на редирект."""
-        login_url = reverse("users:login")
+        login_url = reverse('users:login')
         for name in (
-            "notes:list",
-            "notes:success",
-            "notes:detail",
-            "notes:edit",
-            "notes:delete",
+            'notes:list',
+            'notes:success',
+            'notes:detail',
+            'notes:edit',
+            'notes:delete',
         ):
             with self.subTest(name=name):
-                if name in ("notes:detail", "notes:edit", "notes:delete"):
+                if name in ('notes:detail', 'notes:edit', 'notes:delete'):
                     url = reverse(name, args=(self.note.slug,))
                 else:
                     url = reverse(name)
-                redirect_url = f"{login_url}?next={url}"
+                redirect_url = f'{login_url}?next={url}'
                 response = self.client.get(url)
                 self.assertRedirects(response, redirect_url)
 
@@ -81,9 +81,9 @@ class TestRoutes(TestCase):
         """Проверка доступа списка, добавления заметки."""
         users_statuses = ((self.author, HTTPStatus.OK),)
         urls = (
-            ("notes:add", None),
-            ("notes:success", None),
-            ("notes:list", None),
+            ('notes:add', None),
+            ('notes:success', None),
+            ('notes:list', None),
         )
         for user, status in users_statuses:
             self.client.force_login(user)
