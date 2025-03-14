@@ -51,7 +51,9 @@ def comment(news, author):
 def create_news():
     """Фикстура для создания 10 новостей."""
     news_list = [
-        News(title=f"Заголовок {i}", text=f"Текст новости {i}") for i in range(10)
+        News(
+            title=f"Заголовок {i}",
+            text=f"Текст новости {i}") for i in range(10)
     ]
     News.objects.bulk_create(news_list)
     return news_list
