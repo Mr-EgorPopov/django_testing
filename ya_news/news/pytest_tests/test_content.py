@@ -1,5 +1,6 @@
 import pytest
 from django.conf import settings
+from django.utils import timezone
 from django.urls import reverse
 
 
@@ -26,7 +27,7 @@ def test_auth_user_can_access_comment_form(news, author_client):
 
 @pytest.mark.django_db
 def test_value_news(client, create_news):
-    """Проверка на кол-во новосей на главной странице и их сортировку."""
+    """Проверка на кол-во новостей на главной странице и их сортировку."""
     url = reverse('news:home')
     response = client.get(url)
     news_count = response.context['object_list']
@@ -39,12 +40,11 @@ def test_value_news(client, create_news):
 
 @pytest.mark.django_db
 def test_comment_news(client, create_comments, news):
-    """Проверка на кол-во новосей на главной странице и их сортировку."""
+    """Проверка сортировки комментариев."""
     url = reverse('news:detail', args=(news.pk,))
     response = client.get(url)
-    object_list = response.context['news']
-    comments = object_list.comment_set.all()
-    for comment_true, comment_try in zip(
-        comments, sorted(comments, key=lambda x: x.created, reverse=True)
-    ):
-        assert comment_true.created == comment_try.created
+    assert 'news' in response.context
+    news = response.context['news']
+    all_comments = list(news.comment_set.all())
+    assert isinstance(all_comments[0].created, timezone.datetime)
+    assert all_comments == sorted(all_comments, key=lambda x: x.created)
