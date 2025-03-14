@@ -5,8 +5,7 @@ from django.urls import reverse
 
 @pytest.mark.django_db
 def test_anon_user_cannot_access_comment_form(news, client):
-    """Проверка на то, что форма комментария не доступна для анонима.
-    """
+    """Проверка на то, что форма комментария не доступна для анонима."""
     url = reverse("news:detail", args=(news.pk,))
     response = client.get(url)
     assert response.status_code == 200
@@ -15,9 +14,7 @@ def test_anon_user_cannot_access_comment_form(news, client):
 
 @pytest.mark.django_db
 def test_auth_user_can_access_comment_form(news, author_client):
-    """
-    Проверка на то, что форма комментария доступна для залогиненного юзера.
-    """
+    """Проверка на то, что форма комментария доступна для залогиненного юзера."""
     url = reverse("news:detail", args=(news.pk,))
     response = author_client.get(url)
     assert response.status_code == 200
@@ -26,9 +23,7 @@ def test_auth_user_can_access_comment_form(news, author_client):
 
 @pytest.mark.django_db
 def test_value_news(client, create_news):
-    """
-    Проверка на кол-во новосей на главной странице и их сортировку.
-    """
+    """Проверка на кол-во новосей на главной странице и их сортировку."""
     url = reverse("news:home")
     response = client.get(url)
     news_count = response.context["object_list"]
@@ -41,9 +36,7 @@ def test_value_news(client, create_news):
 
 @pytest.mark.django_db
 def test_comment_news(client, create_comments, news):
-    """
-    Проверка на кол-во новосей на главной странице и их сортировку.
-    """
+    """Проверка на кол-во новосей на главной странице и их сортировку."""
     url = reverse("news:detail", args=(news.pk,))
     response = client.get(url)
     object_list = response.context["news"]

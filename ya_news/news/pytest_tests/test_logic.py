@@ -10,9 +10,7 @@ FORM_DATA = {"text": "Текст комментария"}
 
 @pytest.mark.django_db
 def test_anonymous_user_cant_create_comment(news, client):
-    """
-    Проверка на создание комментаря анонимным пользователем.
-    """
+    """Проверка на создание комментаря анонимным пользователем."""
     url = reverse("news:detail", args=(news.pk,))
     response_post = client.post(url, data=FORM_DATA)
     response_get = client.get(url)
@@ -25,7 +23,7 @@ def test_anonymous_user_cant_create_comment(news, client):
 def test_user_can_create_comment(news, author_client):
     """
     Проверка на создание комментаря авторизированным пользователем
-    и использование запрещенных слов
+    и использование запрещенных слов.
     """
     bad_words_data = {"text": f"{BAD_WORDS[0]}"}
     url = reverse("news:detail", args=(news.pk,))

@@ -27,11 +27,9 @@ class TestPage(TestCase):
         cls.edit_url = reverse("notes:edit", args=(cls.note_author.slug,))
 
     def test_has_form(self):
-        # Авторизуем клиент при помощи ранее созданного пользователя.
         self.client.force_login(self.author)
         response = self.client.get(self.add_url)
         self.assertIn("form", response.context)
-        # Проверим, что объект формы соответствует нужному классу формы.
         self.assertIsInstance(response.context["form"], NoteForm)
 
     def test_notes_list_include(self):

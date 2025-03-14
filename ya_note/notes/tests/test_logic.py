@@ -23,17 +23,13 @@ class TestNoteCreation(TestCase):
         }
 
     def test_anonymous_user_cant_create_note(self):
-        """
-        Проверка на создание заметки анонимом.
-        """
+        """Проверка на создание заметки анонимом."""
         self.client.post(self.url, data=self.form_data)
         notes_count = Note.objects.count()
         self.assertEqual(notes_count, 0)
 
     def test_user_can_create_note(self):
-        """
-        Проверка на создание заметки залогиненным юзером.
-        """
+        """Проверка на создание заметки залогиненным юзером."""
         self.auth_client.force_login(self.user)
         response = self.auth_client.post(self.url, data=self.form_data)
         self.assertEqual(response.status_code, 302)
@@ -58,9 +54,7 @@ class TestNoteCreation(TestCase):
         self.assertEqual(new_note.slug, expected_slug)
 
     def test_edit_note(self):
-        """
-        Проверка редактирования заметки.
-        """
+        """Проверка редактирования заметки."""
         self.auth_client.force_login(self.user)
         url = reverse("notes:add")
         response = self.auth_client.post(url, data=self.form_data)
@@ -81,9 +75,7 @@ class TestNoteCreation(TestCase):
         self.assertEqual(note.text, updated_data["text"])
 
     def test_delete_note(self):
-        """
-        Проверка удаления заметки.
-        """
+        """Проверка удаления заметки."""
         self.auth_client.force_login(self.user)
         url = reverse("notes:add")
         response = self.auth_client.post(url, data=self.form_data)
@@ -96,9 +88,7 @@ class TestNoteCreation(TestCase):
         assert Note.objects.count() == 0
 
     def test_edit_strangers(self):
-        """
-        Проверка редактирования заметки другим пользователем.
-        """
+        """Проверка редактирования заметки другим пользователем."""
         self.auth_client.force_login(self.user)
         url = reverse("notes:add")
         response = self.auth_client.post(url, data=self.form_data)
@@ -119,9 +109,7 @@ class TestNoteCreation(TestCase):
         self.assertNotEqual(note.text, updated_data["text"])
 
     def test_delete_strangers(self):
-        """
-        Проверка удаления заметки другим пользователем.
-        """
+        """Проверка удаления заметки другим пользователем."""
         self.auth_client.force_login(self.user)
         url = reverse("notes:add")
         response = self.auth_client.post(url, data=self.form_data)

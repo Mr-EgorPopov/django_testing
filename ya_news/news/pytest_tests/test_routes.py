@@ -33,7 +33,8 @@ def test_pages_availability_for_anonymous_user(client, name, news):
 @pytest.mark.parametrize("name", ("news:delete", "news:edit"))
 def test_pages_availability_for_author(author_client, name, comment):
     """
-    Проверка доcтупа к редактированию и удалению комментария автору коментария.
+    Проверка доcтупа к редактированию
+    и удалению комментария автору коментария.
     """
     url = reverse(name, args=(comment.pk,))
     response = author_client.get(url)
@@ -57,7 +58,8 @@ def test_redirects(client, name, comment):
 @pytest.mark.parametrize("name", ("news:delete", "news:edit"))
 def test_pages_availability_for_author(not_author_client, name, comment):
     """
-    Проверка доcтупа к редактированию и удалению комментария автору коментария.
+    Проверка доcтупа к редактированию
+    и удалению комментария автору коментария.
     """
     url = reverse(name, args=(comment.pk,))
     response = not_author_client.get(url)
