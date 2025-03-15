@@ -1,7 +1,12 @@
+from datetime import datetime, timedelta
+
 import pytest
 from django.conf import settings
 from django.test.client import Client
+from django.urls import reverse
 from news.models import Comment, News
+
+TODAY = datetime.today()
 
 
 @pytest.fixture
@@ -49,26 +54,44 @@ def comment(news, author):
 
 @pytest.fixture
 def create_news():
-    """Фикстура для создания 10 новостей."""
+    """Фикстура для создания новостей."""
     news_list = [
         News(
             title=f"Заголовок {i}",
-            text=f"Текст новости {i}") for i in range(10)
+            text=f"Текст новости {i}",
+            date=TODAY - timedelta(days=i)) for i in range(
+                settings.NEWS_COUNT_ON_HOME_PAGE + 1
+        )
     ]
     News.objects.bulk_create(news_list)
-    return news_list
 
 
 @pytest.fixture
 def create_comments(news, author):
-    """Фикстура для создания 10 комментариев."""
+    """Фикстура для создания комментариев."""
     comment_list = [
         Comment(
             news=news,
             author=author,
             text=f"Текст комментария {i}",
+            created=TODAY - timedelta(days=i)) for i in range(
+                settings.NEWS_COUNT_ON_HOME_PAGE + 1
         )
         for i in range(settings.NEWS_COUNT_ON_HOME_PAGE)
     ]
     Comment.objects.bulk_create(comment_list)
-    return comment_list
+
+
+@pytest.fixture
+def url_detail(news):
+    return reverse('news:detail', args=(news.pk,))
+
+
+@pytest.fixture
+def url_home():
+    return ('news:home', 'users:login', 'users:logout', 'users:signup')
+
+
+@pytest.fixture
+def url_del_edit():
+    return ('news:delete', 'news:edit')

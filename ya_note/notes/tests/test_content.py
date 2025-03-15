@@ -7,7 +7,7 @@ from notes.models import Note
 User = get_user_model()
 
 
-class TestPage(TestCase):
+class CreateNote(TestCase):
     """Создание фикстур."""
 
     LIST_URL = reverse("notes:list")
@@ -26,18 +26,23 @@ class TestPage(TestCase):
         cls.add_url = reverse('notes:add')
         cls.edit_url = reverse('notes:edit', args=(cls.note_author.slug,))
 
-    def test_has_form(self):
+    def setUp(self):
+        """Авторизация пользователя перед каждым тестом."""
         self.client.force_login(self.author)
-        response = self.client.get(self.add_url)
-        self.assertIn('form', response.context)
-        self.assertIsInstance(response.context['form'], NoteForm)
+
+    def test_has_form(self):
+        response_add = self.client.get(self.add_url)
+        response_edit = self.client.get(self.edit_url)
+        self.assertIn('form', response_add.context)
+        self.assertIsInstance(response_add.context['form'], NoteForm)
+        self.assertIn('form', response_edit.context)
+        self.assertIsInstance(response_edit.context['form'], NoteForm)
 
     def test_notes_list_include(self):
         """
         В список одного пользователя
         не попадают заметки другого.
         """
-        self.client.force_login(self.author)
         response = self.client.get(self.LIST_URL)
         object_list = response.context['object_list']
         self.assertIn(self.note_author, object_list)
@@ -48,7 +53,6 @@ class TestPage(TestCase):
         Отдельная заметка передаётся на
         страницу со списком заметок.
         """
-        self.client.force_login(self.author)
         response = self.client.get(self.LIST_URL)
         object_list = response.context['object_list']
         self.assertIn(self.note_author, object_list)
