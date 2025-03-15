@@ -2,6 +2,7 @@ from http import HTTPStatus
 
 import pytest
 from django.urls import reverse
+
 from news.forms import BAD_WORDS, WARNING
 
 FORM_DATA = {'text': 'Текст комментария'}
