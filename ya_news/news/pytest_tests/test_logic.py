@@ -67,10 +67,10 @@ def test_not_author_can_delete_comment(
         not_author_client,
         comment,
         url_edit,
-        news
 ):
     """
-    Проверка на невозможность редактирования чужого комментария.
+    Проверка на невозможность
+    редактирования чужого комментария.
     """
     comment_edit = {'text': 'Отредактировано'}
     response_edit = not_author_client.post(url_edit, data=comment_edit)
@@ -86,7 +86,8 @@ def test_not_author_can_delete_comment(
         url_delete
 ):
     """
-    Проверка на невозможность удаления чужого комментария.
+    Проверка на невозможность
+    удаления чужого комментария.
     """
     comments_count_before = Comment.objects.count()
     response_post = not_author_client.delete(url_delete)
