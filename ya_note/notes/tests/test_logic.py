@@ -1,68 +1,41 @@
 from http import HTTPStatus
 
 from django.contrib.auth import get_user_model
-from django.test import Client, TestCase
-from django.urls import reverse
 from pytils.translit import slugify
 
 from notes.models import Note
+from notes.tests.class_note import CreateNote
 
 User = get_user_model()
 
 
-class TestLogicNote(TestCase):
+class TestLogicNote(CreateNote):
     """Тест Логики заметок."""
 
     @classmethod
     def setUpTestData(cls):
         """Настройка тестовых данных."""
-        cls.url = reverse("notes:add")
-        cls.user = User.objects.create(username="Залогиненный")
-        cls.another = User.objects.create(username="Пользователь")
-        cls.auth_client = Client()
-        cls.form_data = {
-            "title": "Новый заголовок",
-            "text": "Новый текст",
-            "slug": "new-slug",
-        }
-        cls.updated_data = {
-            "title": "Обновленный заголовок",
-            "text": "Обновленный текст",
-            "slug": "new-slug",
-        }
-        cls.reverse_success = reverse("notes:success")
+        super().setUpTestData()
 
     def setUp(self):
         """Авторизация пользователя перед каждым тестом."""
-        self.auth_client.force_login(self.user)
-        self.notes_count_before = Note.objects.count()
-        Note.objects.all().delete()
+        self.login_user()
 
     def create_note_response(self):
         """Создание заметки и возврат response."""
-        return self.auth_client.post(self.url, data=self.form_data)
-
-    def edit_note_response(self, note):
-        """Редактирование заметки и возврат response."""
-        url = reverse("notes:edit", args=[note.slug])
-        return self.auth_client.post(url, data=self.updated_data)
-
-    def delete_note_response(self, note):
-        """Удаление заметки и возврат response."""
-        delete_url = reverse("notes:delete", args=[note.slug])
-        return self.auth_client.post(delete_url)
-
-    def auth_another(self):
-        return self.auth_client.force_login(self.another)
+        return self.auth_client.post(self.add_url, data=self.form_data)
 
     def test_anonymous_user_cant_create_note(self):
         """Проверка на создание заметки анонимом."""
-        self.client.post(self.url, data=self.form_data)
+        self.notes_count_before = Note.objects.count()
+        self.client.post(self.add_url, data=self.form_data)
         notes_count = Note.objects.count()
         self.assertEqual(notes_count, self.notes_count_before)
 
     def test_user_can_create_note(self):
         """Проверка на создание заметки залогиненным юзером."""
+        Note.objects.all().delete()
+        self.notes_count_before = Note.objects.count()
         response = self.create_note_response()
         self.assertEqual(response.status_code, HTTPStatus.FOUND)
         self.assertRedirects(response, self.reverse_success)
@@ -78,7 +51,9 @@ class TestLogicNote(TestCase):
         Проверка на создание заметки с одинаковым slug,
         а также проверка на автоматическое создание slug.
         """
+        Note.objects.all().delete()
         self.form_data.pop("slug")
+        self.notes_count_before = Note.objects.count()
         response = self.create_note_response()
         self.assertEqual(response.status_code, HTTPStatus.FOUND)
         self.assertRedirects(response, self.reverse_success)
@@ -90,6 +65,9 @@ class TestLogicNote(TestCase):
     def test_edit_note(self):
         """Проверка редактирования заметки."""
         response = self.create_note_response()
+        # Я не понимаю что от меня надо...
+        # мы перстали чистить бд, теперь заметок куча,
+        # нужна же привязка к определенной..
         self.assertEqual(response.status_code, HTTPStatus.FOUND)
         self.assertRedirects(response, self.reverse_success)
         note = Note.objects.get(slug="new-slug")
@@ -103,12 +81,13 @@ class TestLogicNote(TestCase):
 
     def test_delete_note(self):
         """Проверка удаления заметки."""
+        self.notes_count_before = Note.objects.count()
         response = self.create_note_response()
         self.assertEqual(response.status_code, HTTPStatus.FOUND)
         self.assertRedirects(response, self.reverse_success)
         note = Note.objects.get(slug="new-slug")
         self.delete_note_response(note)
-        self.assertEqual(Note.objects.count(), 0)
+        self.assertEqual(Note.objects.count(), self.notes_count_before)
 
     def test_edit_strangers(self):
         """Проверка редактирования заметки другим пользователем."""
@@ -117,6 +96,8 @@ class TestLogicNote(TestCase):
         self.assertRedirects(response, self.reverse_success)
         note = Note.objects.get(slug="new-slug")
         self.auth_another()
+        # И тут не понимаю, нам же надо залогинить другого пользователя
+        # для того, чтобы проверить...
         response = self.edit_note_response(note)
         self.assertEqual(response.status_code, HTTPStatus.NOT_FOUND)
         note_after = Note.objects.get(id=note.id)
@@ -127,10 +108,10 @@ class TestLogicNote(TestCase):
     def test_delete_strangers(self):
         """Проверка удаления заметки другим пользователем."""
         response = self.create_note_response()
-        note_before = Note.objects.count()
+        notes_count_before = Note.objects.count()
         self.assertEqual(response.status_code, HTTPStatus.FOUND)
         self.assertRedirects(response, self.reverse_success)
         note = Note.objects.get(slug="new-slug")
         self.auth_another()
         self.delete_note_response(note)
-        self.assertEqual(Note.objects.count(), note_before)
+        self.assertEqual(Note.objects.count(), notes_count_before)

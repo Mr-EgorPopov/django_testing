@@ -9,7 +9,6 @@ pytestmark = pytest.mark.django_db
 
 def test_pages_availability_for_anonymous_user(
         client,
-        news,
         url_detail,
         url_home
 ):
@@ -17,34 +16,30 @@ def test_pages_availability_for_anonymous_user(
     Проверка на доступ к: главной странцие, логин, логаут,
     регистрации, отдельной новости анонимному пользователю(всем).
     """
-    for adress in url_home:
-        url = reverse(adress)
+    for key, url in url_home.items():
         response = client.get(url)
-        response1 = client.get(url_detail)
         assert response.status_code == HTTPStatus.OK
-        assert response1.status_code == HTTPStatus.OK
+        response_detail = client.get(url_detail)
+        assert response_detail.status_code == HTTPStatus.OK
 
 
 def test_pages_availability_for_author(
         author_client,
-        comment,
-        url_del_edit
+        reverse_url,
 ):
     """
     Проверка доcтупа к редактированию
     и удалению комментария автору коментария.
     """
-    for adress in url_del_edit:
-        url = reverse(adress, args=(comment.pk,))
+    for key, url in reverse_url.items():
         response = author_client.get(url)
         assert response.status_code == HTTPStatus.OK
 
 
-def test_redirects(client, comment, url_del_edit):
+def test_redirects(client, reverse_url):
     """Проверка редиректа на страницу логина."""
     login_url = reverse('users:login')
-    for adress in url_del_edit:
-        url = reverse(adress, args=(comment.pk,))
+    for key, url in reverse_url.items():
         expected_url = f"{login_url}?next={url}"
         response = client.get(url)
         assertRedirects(response, expected_url)
@@ -52,14 +47,13 @@ def test_redirects(client, comment, url_del_edit):
 
 def test_pages_availability_for_author(
     not_author_client,
-    comment,
-    url_del_edit
+    reverse_url
 ):
     """
     Проверка доcтупа к редактированию
-    и удалению комментария автору коментария.
+    и удалению комментария не автору коментария.
     """
-    for adress in url_del_edit:
-        url = reverse(adress, args=(comment.pk,))
+    # Я не понимать про обьеденение тестов на статусы...
+    for key, url in reverse_url.items():
         response = not_author_client.get(url)
         assert response.status_code == HTTPStatus.NOT_FOUND

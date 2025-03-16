@@ -4,6 +4,7 @@ import pytest
 from django.conf import settings
 from django.test.client import Client
 from django.urls import reverse
+from django.utils import timezone
 
 from news.models import Comment, News
 
@@ -70,29 +71,58 @@ def create_news():
 @pytest.fixture
 def create_comments(news, author):
     """Фикстура для создания комментариев."""
-    comment_list = [
-        Comment(
+    comment_list = []
+    for i in range(settings.NEWS_COUNT_ON_HOME_PAGE):
+        comment = Comment(
             news=news,
             author=author,
             text=f"Текст комментария {i}",
-            created=TODAY - timedelta(days=i)) for i in range(
-                settings.NEWS_COUNT_ON_HOME_PAGE + 1
         )
-        for i in range(settings.NEWS_COUNT_ON_HOME_PAGE)
-    ]
-    Comment.objects.bulk_create(comment_list)
+        comment.save()
+        comment.created = timezone.now() - timedelta(days=i)
+        comment.save()
+        comment_list.append(comment)
+    return comment_list
 
 
 @pytest.fixture
 def url_detail(news):
+    """Фикстура для реверса отдельной новости."""
     return reverse('news:detail', args=(news.pk,))
 
 
 @pytest.fixture
 def url_home():
-    return ('news:home', 'users:login', 'users:logout', 'users:signup')
+    """
+    Возвращает реверсы для главной страницы,
+    логина, логаута и регистрации.
+    """
+    return {
+        'home': reverse('news:home'),
+        'login': reverse('users:login'),
+        'logout': reverse('users:logout'),
+        'signup': reverse('users:signup'),
+    }
 
 
 @pytest.fixture
-def url_del_edit():
-    return ('news:delete', 'news:edit')
+def reverse_url(comment):
+    return {
+        'delete': reverse('news:delete', args=(comment.pk,)),
+        'edit': reverse('news:edit', args=(comment.pk,))
+    }
+
+
+@pytest.fixture
+def url_edit(comment):
+    return reverse('news:edit', args=(comment.pk,))
+
+
+@pytest.fixture
+def url_delete(comment):
+    return reverse('news:delete', args=(comment.pk,))
+
+
+@pytest.fixture
+def url_edit(comment):
+    return reverse('news:edit', args=(comment.pk,))

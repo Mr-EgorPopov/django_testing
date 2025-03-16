@@ -23,9 +23,9 @@ def test_auth_user_can_access_comment_form(news, author_client, url_detail):
     доступна для залогиненного юзера.
     """
     response = author_client.get(url_detail)
-    form = response.context['form']
     assert response.status_code == HTTPStatus.OK
     assert 'form' in response.context
+    form = response.context['form']
     assert isinstance(form, CommentForm)
 
 
