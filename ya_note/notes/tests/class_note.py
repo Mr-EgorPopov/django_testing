@@ -16,19 +16,19 @@ class CreateNote(TestCase):
     def setUpTestData(cls):
         """Создание новостей."""
         cls.author = User.objects.create(username='author')
-        cls.user = User.objects.create(username='user')
-        cls.anon = User.objects.create(username='anonuser')
+        cls.not_author = User.objects.create(username='user')
         cls.note_author = Note.objects.create(
             title='Заголовок', text='Текст', author=cls.author
         )
-        cls.note_user = Note.objects.create(
-            title='Заголовок_детект', text='Текст', author=cls.user
+        cls.note_not_author = Note.objects.create(
+            title='Заголовок_детект',
+            text='Текст',
+            author=cls.not_author
         )
-        cls.add_url = reverse('notes:add')
-        cls.edit_url = reverse('notes:edit', args=(cls.note_author.slug,))
-        cls.client = cls.client_class()
-        cls.another = User.objects.create(username="Пользователь")
-        cls.auth_client = Client()
+        cls.author_client = Client()
+        cls.author_client.force_login(cls.author)
+        cls.not_author_client = Client()
+        cls.not_author_client.force_login(cls.not_author)
         cls.form_data = {
             "title": "Новый заголовок",
             "text": "Новый текст",
@@ -39,50 +39,85 @@ class CreateNote(TestCase):
             "text": "Обновленный текст",
             "slug": "new-slug",
         }
+        cls.edit_url = reverse('notes:edit', args=(cls.note_author.slug,))
+        cls.add_url = reverse('notes:add')
         cls.reverse_success = reverse("notes:success")
+        cls.notes_list = reverse('notes:list')
+        cls.home = reverse('notes:home')
+        cls.edit = ('notes:edit')
+        cls.delete = ('notes:delete')
+        cls.detail = ('notes:detail')
+        cls.success = ("notes:success")
+        cls.list = ('notes:list')
+        cls.login = reverse('users:login')
+        cls.logaut = reverse('users:logout')
+        cls.signup = reverse('users:signup')
         cls.urls_home = (
-            reverse('notes:home', None),
-            reverse('users:login', None),
-            reverse('users:logout', None),
-            reverse('users:signup', None),
+            cls.home,
+            cls.login,
+            cls.logaut,
+            cls.signup,
         )
         cls.url_edit = (
-            'notes:edit',
-            'notes:delete',
-            'notes:detail',
+            cls.edit,
+            cls.delete,
+            cls.detail,
         )
         cls.url_list = (
-            'notes:list',
-            'notes:success',
-            'notes:detail',
-            'notes:edit',
-            'notes:delete',
+            cls.list,
+            cls.success,
+            cls.detail,
+            cls.edit,
+            cls.delete,
         )
         cls.url_add = (
-            reverse('notes:add', None),
-            reverse('notes:success', None),
-            reverse('notes:list', None),
+            cls.add_url,
+            cls.reverse_success,
+            cls.notes_list
+        )
+        cls.edit_url_author = reverse(
+            'notes:edit',
+            args=[cls.note_author.slug]
+        )
+        cls.edit_url_not_author = reverse(
+            'notes:edit',
+            args=[cls.note_author.slug]
+        )
+        cls.delete_url_author = reverse(
+            "notes:delete",
+            args=[cls.note_author.slug]
+        )
+        cls.delete_url_not_author = reverse(
+            "notes:delete",
+            args=[cls.note_author.slug]
         )
 
-    def login_author(self):
-        """Логин автора для тестов."""
-        self.client.force_login(self.author)
-
-    def login_user(self):
-        self.auth_client.force_login(self.user)
-
-    def edit_note_response(self, note):
+    def edit_author_note(self):
         """Редактирование заметки и возврат response."""
-        url = reverse("notes:edit", args=[note.slug])
-        return self.auth_client.post(url, data=self.updated_data)
+        return self.author_client.post(
+            self.edit_url_author,
+            data=self.updated_data
+        )
 
-    def delete_note_response(self, note):
+    def delete_author_note(self):
         """Удаление заметки и возврат response."""
-        delete_url = reverse("notes:delete", args=[note.slug])
-        return self.auth_client.post(delete_url)
+        return self.author_client.post(self.delete_url_author)
 
-    def auth_another(self):
-        return self.auth_client.force_login(self.another)
+    def create_author_note(self):
+        """Создание заметки и возврат response."""
+        return self.author_client.post(self.add_url, data=self.form_data)
 
-    def user_login(self, user):
-        return self.client.force_login(user)
+    def edit_not_author_note(self):
+        """Редактирование заметки и возврат response."""
+        return self.not_author_client.post(
+            self.edit_url_not_author,
+            data=self.updated_data
+        )
+
+    def delete_not_author_note(self):
+        """Удаление заметки и возврат response."""
+        return self.not_author_client.post(self.delete_url_not_author)
+
+    def create_not_author_note(self):
+        """Создание заметки и возврат response."""
+        return self.not_author_client.post(self.add_url, data=self.form_data)
