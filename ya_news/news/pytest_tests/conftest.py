@@ -73,15 +73,12 @@ def create_comments(news, author):
     """Фикстура для создания комментариев."""
     comment_list = []
     for i in range(settings.NEWS_COUNT_ON_HOME_PAGE):
-        comment = Comment(
+        comment = Comment.objects.create(
             news=news,
             author=author,
             text=f"Текст комментария {i}",
         )
-        comment.save()
         comment.created = timezone.now() - timedelta(days=i)
-        comment.save()
-        comment_list.append(comment)
     return comment_list
 
 
@@ -106,10 +103,10 @@ def url_home():
 
 
 @pytest.fixture
-def reverse_url(comment):
+def reverse_url(url_edit, url_delete):
     return {
-        'delete': reverse('news:delete', args=(comment.pk,)),
-        'edit': reverse('news:edit', args=(comment.pk,))
+        'edit': url_edit,
+        'delete': url_delete
     }
 
 
@@ -124,5 +121,11 @@ def url_delete(comment):
 
 
 @pytest.fixture
-def url_edit(comment):
-    return reverse('news:edit', args=(comment.pk,))
+def url_home_only():
+    """Возвращает реверс для главной страницы."""
+    return reverse('news:home')
+
+
+@pytest.fixture
+def login_url():
+    return reverse('users:login')

@@ -7,20 +7,29 @@ from pytest_django.asserts import assertRedirects
 pytestmark = pytest.mark.django_db
 
 
+@pytest.mark.parametrize(
+    'reverse_url, parametrized_client, status',
+    [
+        ('news:home', 'client', HTTPStatus.OK),
+        ('users:login', 'client', HTTPStatus.OK),
+        ('users:logout', 'client', HTTPStatus.OK),
+        ('users:signup', 'client', HTTPStatus.OK),
+    ]
+)
 def test_pages_availability_for_anonymous_user(
-        client,
-        url_detail,
-        url_home
+        reverse_url,
+        parametrized_client,
+        status,
+        request
 ):
     """
     Проверка на доступ к: главной странцие, логин, логаут,
     регистрации, отдельной новости анонимному пользователю(всем).
     """
-    for key, url in url_home.items():
-        response = client.get(url)
-        assert response.status_code == HTTPStatus.OK
-        response_detail = client.get(url_detail)
-        assert response_detail.status_code == HTTPStatus.OK
+    client = request.getfixturevalue(parametrized_client)
+    url = reverse(reverse_url)
+    response = client.get(url)
+    assert response.status_code == status
 
 
 def test_pages_availability_for_author(
@@ -36,24 +45,31 @@ def test_pages_availability_for_author(
         assert response.status_code == HTTPStatus.OK
 
 
-def test_redirects(client, reverse_url):
+def test_redirects(client, reverse_url, login_url):
     """Проверка редиректа на страницу логина."""
-    login_url = reverse('users:login')
     for key, url in reverse_url.items():
         expected_url = f"{login_url}?next={url}"
         response = client.get(url)
         assertRedirects(response, expected_url)
 
 
+@pytest.mark.parametrize(
+    'reverse_url, parametrized_client, status',
+    [
+        ('news:edit', 'not_author_client', HTTPStatus.NOT_FOUND),
+        ('news:delete', 'not_author_client', HTTPStatus.NOT_FOUND),
+    ]
+)
 def test_pages_availability_for_author(
-    not_author_client,
-    reverse_url
+        reverse_url,
+        parametrized_client,
+        status,
+        request
 ):
     """
     Проверка доcтупа к редактированию
     и удалению комментария не автору коментария.
     """
-    # Я не понимать про обьеденение тестов на статусы...
-    for key, url in reverse_url.items():
-        response = not_author_client.get(url)
-        assert response.status_code == HTTPStatus.NOT_FOUND
+    client = request.getfixturevalue(parametrized_client)
+    response = client.get(reverse_url)
+    assert response.status_code == status

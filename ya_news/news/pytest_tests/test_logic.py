@@ -33,7 +33,7 @@ def test_user_can_create_comment(author_client, url_detail):
     assert WARNING in form.errors['text']
 
 
-def test_author_can_delete_comment(
+def test_author_can_edit_comment(
         author_client,
         comment,
         url_edit
@@ -44,9 +44,10 @@ def test_author_can_delete_comment(
     """
     comment_edit = {'text': 'Отредактировано'}
     author_client.post(url_edit, data=comment_edit)
-    comment_text = Comment.objects.get(id=comment.id)
-    assert comment_edit['text'] == comment_text.text
-    assert comment_text['author'] == author_client
+    updated_comment = Comment.objects.get(id=comment.id)
+    assert comment_edit['text'] == updated_comment.text
+    assert updated_comment.author == comment.author
+    assert comment.news == updated_comment.news
 
 
 def test_author_can_delete_comment(
@@ -75,10 +76,10 @@ def test_not_author_can_delete_comment(
     comment_edit = {'text': 'Отредактировано'}
     response_edit = not_author_client.post(url_edit, data=comment_edit)
     assert response_edit.status_code == HTTPStatus.NOT_FOUND
-    comment_text = Comment.objects.get(pk=comment.pk)
-    assert comment.text == comment_text.text
-    assert comment.author == comment_text.author
-    assert comment.news == comment_text.news
+    updated_comment = Comment.objects.get(pk=comment.pk)
+    assert comment.text == updated_comment.text
+    assert comment.author == updated_comment.author
+    assert comment.news == updated_comment.news
 
 
 def test_not_author_can_delete_comment(
