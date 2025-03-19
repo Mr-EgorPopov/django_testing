@@ -71,7 +71,6 @@ def create_news():
 @pytest.fixture
 def create_comments(news, author):
     """Фикстура для создания комментариев."""
-    comment_list = []
     for i in range(settings.NEWS_COUNT_ON_HOME_PAGE):
         comment = Comment.objects.create(
             news=news,
@@ -79,7 +78,7 @@ def create_comments(news, author):
             text=f"Текст комментария {i}",
         )
         comment.created = timezone.now() - timedelta(days=i)
-    return comment_list
+        comment.save()
 
 
 @pytest.fixture

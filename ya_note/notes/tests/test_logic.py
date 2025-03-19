@@ -19,12 +19,10 @@ class TestLogicNote(CreateNote):
     def test_user_can_create_note(self):
         """Проверка на создание заметки залогиненным пользователем."""
         Note.objects.all().delete()
-        self.notes_count_before = Note.objects.count()
         response = self.create_author_note()
         self.assertEqual(response.status_code, HTTPStatus.FOUND)
         self.assertRedirects(response, self.reverse_success)
-        notes_count = Note.objects.count()
-        self.assertEqual(notes_count, self.notes_count_before + 1)
+        self.assertEqual(Note.objects.count(), 1) 
         created_note = Note.objects.get()
         self.assertEqual(created_note.title, self.form_data['title'])
         self.assertEqual(created_note.text, self.form_data['text'])
@@ -53,7 +51,7 @@ class TestLogicNote(CreateNote):
         note_after = Note.objects.get(id=self.note_author.id)
         self.assertEqual(note_after.title, self.updated_data["title"])
         self.assertEqual(note_after.text, self.updated_data["text"])
-        self.assertEqual(note_after.author, self.author)
+        self.assertEqual(note_after.author, self.note_author.author)
 
     def test_delete_note(self):
         """Проверка удаления пользователем своей заметки."""
@@ -68,7 +66,7 @@ class TestLogicNote(CreateNote):
         note_after = Note.objects.get(id=self.note_author.id)
         self.assertNotEqual(note_after.title, self.updated_data["title"])
         self.assertNotEqual(note_after.text, self.updated_data["text"])
-        self.assertNotEqual(note_after.author, self.not_author)
+        self.assertEqual(note_after.author, self.note_author.author)
 
     def test_delete_strangers(self):
         """Проверка удаления заметки другим пользователем."""

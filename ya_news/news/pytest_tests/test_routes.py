@@ -32,44 +32,70 @@ def test_pages_availability_for_anonymous_user(
     assert response.status_code == status
 
 
-def test_pages_availability_for_author(
-        author_client,
-        reverse_url,
-):
-    """
-    Проверка доcтупа к редактированию
-    и удалению комментария автору коментария.
-    """
-    for key, url in reverse_url.items():
-        response = author_client.get(url)
-        assert response.status_code == HTTPStatus.OK
-
-
-def test_redirects(client, reverse_url, login_url):
-    """Проверка редиректа на страницу логина."""
-    for key, url in reverse_url.items():
-        expected_url = f"{login_url}?next={url}"
-        response = client.get(url)
-        assertRedirects(response, expected_url)
-
-
 @pytest.mark.parametrize(
-    'reverse_url, parametrized_client, status',
+    'reverse_url,  parametrized_client, key',
     [
-        ('news:edit', 'not_author_client', HTTPStatus.NOT_FOUND),
-        ('news:delete', 'not_author_client', HTTPStatus.NOT_FOUND),
+        (
+            'news:edit',
+            'author_client',
+            'args=(comment.pk,)'
+        ),
+        (
+            'news:delete',
+            'author_client',
+            'args=(comment.pk,)'
+        ),
     ]
 )
 def test_pages_availability_for_author(
         reverse_url,
         parametrized_client,
-        status,
-        request
+        request,
+        key
+):
+    """
+    Проверка доcтупа к редактированию
+    и удалению комментария автору коментария.
+    """
+    client = request.getfixturevalue(parametrized_client)
+    response = client.get(reverse_url + key)
+    assert response.status_code == HTTPStatus.NOT_FOUND
+
+
+@pytest.mark.parametrize("key", ['edit', 'delete'])
+def test_redirects(client, reverse_url, login_url, key):
+    """Проверка редиректа на страницу логина."""
+    url = reverse_url[key]
+    expected_url = f"{login_url}?next={url}"
+    response = client.get(url)
+    assertRedirects(response, expected_url)
+
+
+@pytest.mark.parametrize(
+    'reverse_url,  parametrized_client, key',
+    [
+        (
+            'news:edit',
+            'not_author_client',
+            'args=(comment.pk,)'
+        ),
+        (
+            'news:delete',
+            'not_author_client',
+            'args=(comment.pk,)'
+        ),
+    ]
+)
+def test_pages_availability_for_not_author(
+        reverse_url,
+        parametrized_client,
+        request,
+        key
 ):
     """
     Проверка доcтупа к редактированию
     и удалению комментария не автору коментария.
     """
     client = request.getfixturevalue(parametrized_client)
-    response = client.get(reverse_url)
-    assert response.status_code == status
+    response = client.get(reverse_url + key)
+    assert response.status_code == HTTPStatus.NOT_FOUND

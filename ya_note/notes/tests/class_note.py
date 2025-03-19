@@ -10,8 +10,6 @@ User = get_user_model()
 class CreateNote(TestCase):
     """Создание фикстур."""
 
-    LIST_URL = reverse("notes:list")
-
     @classmethod
     def setUpTestData(cls):
         """Создание новостей."""
@@ -24,56 +22,6 @@ class CreateNote(TestCase):
             title='Заголовок_детект',
             text='Текст',
             author=cls.not_author
-        )
-        cls.author_client = Client()
-        cls.author_client.force_login(cls.author)
-        cls.not_author_client = Client()
-        cls.not_author_client.force_login(cls.not_author)
-        cls.form_data = {
-            "title": "Новый заголовок",
-            "text": "Новый текст",
-            "slug": "new-slug",
-        }
-        cls.updated_data = {
-            "title": "Обновленный заголовок",
-            "text": "Обновленный текст",
-            "slug": "new-slug",
-        }
-        cls.edit_url = reverse('notes:edit', args=(cls.note_author.slug,))
-        cls.add_url = reverse('notes:add')
-        cls.reverse_success = reverse("notes:success")
-        cls.notes_list = reverse('notes:list')
-        cls.home = reverse('notes:home')
-        cls.edit = ('notes:edit')
-        cls.delete = ('notes:delete')
-        cls.detail = ('notes:detail')
-        cls.success = ("notes:success")
-        cls.list = ('notes:list')
-        cls.login = reverse('users:login')
-        cls.logaut = reverse('users:logout')
-        cls.signup = reverse('users:signup')
-        cls.urls_home = (
-            cls.home,
-            cls.login,
-            cls.logaut,
-            cls.signup,
-        )
-        cls.url_edit = (
-            cls.edit,
-            cls.delete,
-            cls.detail,
-        )
-        cls.url_list = (
-            cls.list,
-            cls.success,
-            cls.detail,
-            cls.edit,
-            cls.delete,
-        )
-        cls.url_add = (
-            cls.add_url,
-            cls.reverse_success,
-            cls.notes_list
         )
         cls.edit_url_author = reverse(
             'notes:edit',
@@ -90,6 +38,53 @@ class CreateNote(TestCase):
         cls.delete_url_not_author = reverse(
             "notes:delete",
             args=[cls.note_author.slug]
+        )
+        cls.author_client = Client()
+        cls.author_client.force_login(cls.author)
+        cls.not_author_client = Client()
+        cls.not_author_client.force_login(cls.not_author)
+        cls.form_data = {
+            "title": "Новый заголовок",
+            "text": "Новый текст",
+            "slug": "new-slug",
+        }
+        cls.updated_data = {
+            "title": "Обновленный заголовок",
+            "text": "Обновленный текст",
+            "slug": "new-slug",
+        }
+        cls.edit_url = cls.edit_url_author
+        cls.edit_url = reverse('notes:edit', args=(cls.note_author.slug,))
+        cls.add_url = reverse('notes:add')
+        cls.reverse_success = reverse("notes:success")
+        cls.notes_list = reverse('notes:list')
+        cls.home = reverse('notes:home')
+        cls.detail = reverse('notes:detail', args=(cls.note_author.slug,))
+        cls.login = reverse('users:login')
+        cls.logaut = reverse('users:logout')
+        cls.signup = reverse('users:signup')
+        cls.urls_home = (
+            cls.home,
+            cls.login,
+            cls.logaut,
+            cls.signup,
+        )
+        cls.url_edit = (
+            cls.edit_url_author,
+            cls.delete_url_author,
+            cls.detail,
+        )
+        cls.url_list = (
+            cls.notes_list,
+            cls.reverse_success,
+            cls.detail,
+            cls.edit_url_author,
+            cls.delete_url_author,
+        )
+        cls.url_add = (
+            cls.add_url,
+            cls.reverse_success,
+            cls.notes_list
         )
 
     def edit_author_note(self):

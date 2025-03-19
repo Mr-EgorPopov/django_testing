@@ -25,7 +25,7 @@ class ContentTest(CreateNote):
         В список заметок одного пользователя
         не попадают заметки другого пользователя.
         """
-        response = self.author_client.get(self.LIST_URL)
+        response = self.author_client.get(self.notes_list)
         notes = response.context['object_list']
         self.assertIn(self.note_author, notes)
         self.assertNotIn(self.note_not_author, notes)
@@ -35,6 +35,6 @@ class ContentTest(CreateNote):
         Отдельная заметка передаётся на страницу
         со списком заметок в списке object_list в словаре context.
         """
-        response = self.author_client.get(self.LIST_URL)
+        response = self.author_client.get(self.notes_list)
         notes = response.context['object_list']
         self.assertIn(self.note_author, notes)
