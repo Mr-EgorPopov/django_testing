@@ -22,7 +22,7 @@ class TestLogicNote(CreateNote):
         response = self.create_author_note()
         self.assertEqual(response.status_code, HTTPStatus.FOUND)
         self.assertRedirects(response, self.reverse_success)
-        self.assertEqual(Note.objects.count(), 1) 
+        self.assertEqual(Note.objects.count(), 1)
         created_note = Note.objects.get()
         self.assertEqual(created_note.title, self.form_data['title'])
         self.assertEqual(created_note.text, self.form_data['text'])
