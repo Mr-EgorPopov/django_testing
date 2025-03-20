@@ -64,8 +64,8 @@ class TestLogicNote(CreateNote):
         response_not_author = self.edit_not_author_note()
         self.assertEqual(response_not_author.status_code, HTTPStatus.NOT_FOUND)
         note_after = Note.objects.get(id=self.note_author.id)
-        self.assertNotEqual(note_after.title, self.updated_data["title"])
-        self.assertNotEqual(note_after.text, self.updated_data["text"])
+        self.assertEqual(note_after.title, self.note_author.title)
+        self.assertEqual(note_after.text, self.note_author.text)
         self.assertEqual(note_after.author, self.note_author.author)
 
     def test_delete_strangers(self):

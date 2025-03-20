@@ -8,58 +8,63 @@ pytestmark = pytest.mark.django_db
 
 
 @pytest.mark.parametrize(
-    'reverse_url, parametrized_client, status',
+    'url_key, parametrized_client, status',
     [
-        ('news:home', 'client', HTTPStatus.OK),
-        ('users:login', 'client', HTTPStatus.OK),
-        ('users:logout', 'client', HTTPStatus.OK),
-        ('users:signup', 'client', HTTPStatus.OK),
+        ('home', 'client', HTTPStatus.OK),
+        ('login', 'client', HTTPStatus.OK),
+        ('logout', 'client', HTTPStatus.OK),
+        ('signup', 'client', HTTPStatus.OK),
     ]
 )
 def test_pages_availability_for_anonymous_user(
-        reverse_url,
+        url_key,
         parametrized_client,
         status,
-        request
+        request,
+        url_home
 ):
     """
-    Проверка на доступ к: главной странцие, логин, логаут,
-    регистрации, отдельной новости анонимному пользователю(всем).
+    Проверка на доступ к: главной странице, логину, логауту,
+    регистрации анонимному пользователю (всем).
     """
     client = request.getfixturevalue(parametrized_client)
-    url = reverse(reverse_url)
+    url = url_home[url_key]
     response = client.get(url)
     assert response.status_code == status
 
 
-@pytest.mark.parametrize(
-    'reverse_url,  parametrized_client, key',
+@pytest.mark.parametrize( 
+    'url_key, parametrized_client, comment_pk',
     [
         (
-            'news:edit',
+            'edit',
             'author_client',
-            'args=(comment.pk,)'
+            True
         ),
         (
-            'news:delete',
+            'delete',
             'author_client',
-            'args=(comment.pk,)'
+            True
         ),
     ]
 )
 def test_pages_availability_for_author(
-        reverse_url,
+        url_key,
         parametrized_client,
         request,
-        key
+        comment_pk
 ):
     """
-    Проверка доcтупа к редактированию
-    и удалению комментария автору коментария.
+    Проверка доступа к редактированию
+    и удалению комментария автору комментария.
     """
     client = request.getfixturevalue(parametrized_client)
-    response = client.get(reverse_url + key)
-    assert response.status_code == HTTPStatus.NOT_FOUND
+    comment = request.getfixturevalue('comment')
+    url = request.getfixturevalue('reverse_url')[url_key]
+    if comment_pk:
+        url += f'?id={comment.pk}'
+    response = client.get(url)
+    assert response.status_code == HTTPStatus.OK
 
 
 @pytest.mark.parametrize("key", ['edit', 'delete'])
@@ -72,30 +77,35 @@ def test_redirects(client, reverse_url, login_url, key):
 
 
 @pytest.mark.parametrize(
-    'reverse_url,  parametrized_client, key',
+    'url_key, parametrized_client, comment_pk',
     [
         (
-            'news:edit',
+            'edit',
             'not_author_client',
-            'args=(comment.pk,)'
+            True
         ),
         (
-            'news:delete',
+            'delete',
             'not_author_client',
-            'args=(comment.pk,)'
+            True
         ),
     ]
 )
 def test_pages_availability_for_not_author(
-        reverse_url,
+        url_key,
         parametrized_client,
         request,
-        key
+        comment_pk
 ):
     """
     Проверка доcтупа к редактированию
     и удалению комментария не автору коментария.
     """
     client = request.getfixturevalue(parametrized_client)
-    response = client.get(reverse_url + key)
+    comment = request.getfixturevalue('comment')
+    url = request.getfixturevalue('reverse_url')[url_key]
+    if comment_pk:
+        url += f'?id={comment.pk}'
+    response = client.get(url)
     assert response.status_code == HTTPStatus.NOT_FOUND
+    
