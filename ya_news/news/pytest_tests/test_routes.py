@@ -1,7 +1,6 @@
 from http import HTTPStatus
 
 import pytest
-from django.urls import reverse
 from pytest_django.asserts import assertRedirects
 
 pytestmark = pytest.mark.django_db
@@ -33,7 +32,7 @@ def test_pages_availability_for_anonymous_user(
     assert response.status_code == status
 
 
-@pytest.mark.parametrize( 
+@pytest.mark.parametrize(
     'url_key, parametrized_client, comment_pk',
     [
         (
@@ -108,4 +107,3 @@ def test_pages_availability_for_not_author(
         url += f'?id={comment.pk}'
     response = client.get(url)
     assert response.status_code == HTTPStatus.NOT_FOUND
-    
